@@ -75,7 +75,7 @@ def pretrain_nlp(train_df, test_df):
     learn.save_encoder('text_encoder')
     return None
 
-def test_deep_b3(test_df):
+def test_deep_b3(train_df, test_df):
     bs = 64
     test_df['PicturePath'] = test_df.id.map(lambda x: 'test_images/{0}.png'.format(x))
     pklpath = os.path.join(BASE_DIR, 'datapkl')
@@ -148,11 +148,11 @@ def train_deep_b3(train_df, test_df, bs, vis_out, text_out):
     norm, denorm = model.normalize_custom_funcs(*imagenet_stats)
     data.add_tfm(norm)  # normalize images
 
-    #logging.info('save the mixed data file')
-    #outfile = os.path.join(pklpath, 'mixed_img_tab_text.pkl')
-    #outfile = open(outfile, 'wb')
-    #pickle.dump(mixed, outfile)
-    #outfile.close()
+    logging.info('save the mixed data file')
+    outfile = os.path.join(pklpath, 'mixed_img_tab_text.pkl')
+    outfile = open(outfile, 'wb')
+    pickle.dump(mixed, outfile)
+    outfile.close()
 
     test_df['is_valid'] = False
 
@@ -226,7 +226,7 @@ def train_deep_b3(train_df, test_df, bs, vis_out, text_out):
     exrpath = os.path.join(BASE_DIR, '{0}/{1}'.format('models', 'mixed-export.pkl'))
     logging.info('export deep-b3 model as {0}'.format(exrpath))
     learn.export(exrpath)
-    #test_deep_b3(test_df)
+    #test_deep_b3(train_df, test_df)
 
 
 def parse_args():
@@ -263,12 +263,6 @@ if __name__ == '__main__':
         train = os.path.join(os.path.join(BASE_DIR, 'train'), args.train_feature)
         test = os.path.join(os.path.join(BASE_DIR, 'test'), args.test_feature)
         train_df = read_csv_file(train)
-        test_df = read_csv_file(train)
+        test_df = read_csv_file(test)
         pretrain_nlp(train_df, test_df)
         train_deep_b3(train_df, test_df, int(args.bs), int(args.vis_out), int(args.text_out))
-    else:
-        logging.info('test deep-b3')
-        test = os.path.join(os.path.join(BASE_DIR, 'test'), args.feature)
-        logging.info('begin read the test fature file {0}'.format(test))
-        test_df = read_csv_file(test)
-        test_deep_b3(test_df)
